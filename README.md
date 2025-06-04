@@ -36,7 +36,10 @@ Example of ESP32-S3 and support for mini keyboard with built-in touchpad: [here]
 ![img](https://raw.githubusercontent.com/rtek1000/ESP32-S3_USB_Host_HID_Keyboard/main/Mini%20Keyboard%20With%20Touchpad%20Built-in.jpg)
 
 -----
+-----
 
-Warning: user [j2s](https://github.com/rtek1000/YD-ESP32-23/issues/3) reported that on his board the 5V pin is another 3V3 pin, check your board before using.
+#### Warning:
+
+User [j2s](https://github.com/rtek1000/YD-ESP32-23/issues/3) reported that on his board the 5V pin is another 3V3 pin, check your board before using.
 
 ![img](https://raw.githubusercontent.com/rtek1000/YD-ESP32-23/refs/heads/main/YD-ESP32-23_V1120.jpg)
