@@ -45,42 +45,128 @@ User [j2s](https://github.com/rtek1000/YD-ESP32-23/issues/3) reported that on hi
 ![img](https://raw.githubusercontent.com/rtek1000/YD-ESP32-23/refs/heads/main/YD-ESP32-23_V1120.jpg)
 
 
-# 通用GPIO
-| GPIO 引脚 | 类型 | 备注（使用优势）                     |
-| --------- | ---- | ------------------------------------ |
-| GPIO10    | 通用 | 无特殊复用，开发板通常无焊接占用     |
-| GPIO11    | 通用 | 同上，与 GPIO10 成对使用更方便       |
-| GPIO12    | 通用 | 兼容大部分 ESP32-S3 开发板           |
-| GPIO13    | 通用 | 无启动 / 下载相关复用                |
-| GPIO14    | 通用 | 无特殊功能绑定                       |
-| GPIO15    | 通用 | 无系统级复用                         |
-| GPIO16    | 通用 | 可兼容 PWM/ADC（若需扩展功能）       |
-| GPIO17    | 通用 | 同上                                 |
-| GPIO18    | 通用 | 无默认复用                           |
-| GPIO19    | 通用 | 无默认复用                           |
-| GPIO20    | 通用 | 无默认复用                           |
-| GPIO21    | 通用 | 无默认复用                           |
-| GPIO22    | 通用 | 无默认复用                           |
-| GPIO23    | 通用 | 无默认复用                           |
-# 复用GPIO
-| GPIO 引脚 | 核心复用功能                | 使用注意事项                                                                                                   |
-| --------- | --------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| GPIO0     | BOOT 启动模式引脚           | 1. 悬空 = 高电平，接 GND = 进入下载模式；2. 启动后可作为普通 GPIO，但复位后仍会影响启动；3. 不推荐做输入（易误触发下载模式） |
-| GPIO1     | USB_BOOT 引脚（USB 下载）   | 1. 硬件默认下拉，常态低电平；2. 复用为 USB DFU 下载功能，解除复用后仍可能被系统占用；3. 做输入时电平始终偏低（你遇到的问题根源） |
-| GPIO2     | UART0 RX（串口下载）        | 1. 部分开发板复用为串口下载的 RX 引脚；2. 做普通 GPIO 需先禁用串口下载功能                                       |
-| GPIO3     | UART0 TX（串口下载）        | 1. 部分开发板复用为串口下载的 TX 引脚；2. 做输出时可能干扰程序下载                                             |
-| GPIO4     | SD 卡数据引脚               | 1. 若开发板带 SD 卡槽，会被占用；2. 无 SD 卡时可解除复用做普通 GPIO                                             |
-| GPIO5     | SD 卡数据引脚               | 同上                                                                                                           |
-| GPIO6-9   | SPI Flash 引脚（QSPI）      | 1. 核心存储引脚，绝对禁止使用；2. 占用会导致程序无法启动 / 崩溃                                                 |
-| GPIO40    | USB D + 引脚（USB 数据）    | 1. 板载 USB 口的差分数据引脚；2. 占用会导致 USB 下载 / 虚拟串口失效                                           |
-| GPIO41    | USB D - 引脚（USB 数据）    | 同上                                                                                                           |
-| GPIO42    | RTC 时钟 / 触摸引脚         | 1. 默认复用为 RTC 低功耗时钟；2. 做普通 GPIO 需关闭 RTC 功能                                                   |
-| GPIO43    | UART2 TX（硬件串口）        | 1. 系统默认 UART2 的 TX 引脚；2. 做普通 GPIO 需先解除 UART2 绑定（Serial2.end()）                               |
-| GPIO44    | UART2 RX（硬件串口）        | 1. 系统默认 UART2 的 RX 引脚；2. 做普通 GPIO 需先解除 UART2 绑定                                               |
-| GPIO45    | LEDC/PWM 引脚               | 1. 部分开发板默认作为板载 LED 引脚；2. 做输入需先关闭 PWM 输出                                                 |
-| GPIO46    | LEDC/PWM 引脚               | 同上  
-#  总结                                           
+# YD-ESP32-23 GPIO 使用说明（精简版）
 
-1. 通用 GPIO：GPIO10-23 无默认复用，是普通输入 / 输出的首选，无需额外配置；
-2. 高危复用引脚：GPIO0/GPIO1/GPIO6-9 绝对不推荐做普通 GPIO，易导致启动失败 / 电平异常；
-3. 低危复用引脚：GPIO43/GPIO44（UART2）、GPIO45/GPIO46（PWM）可解除复用后使用，但需先关闭对应功能。
+适用于基于 **ESP32-S3** 的 **YD-ESP32-23** 类开发板（双 Type-C、CH343P、板载 RGB LED）。
+
+## GPIO 使用结论
+
+### 推荐优先使用
+- GPIO1
+- GPIO2
+- GPIO4
+- GPIO5
+- GPIO6
+- GPIO7
+- GPIO8
+- GPIO9
+- GPIO10
+- GPIO11
+- GPIO12
+- GPIO13
+- GPIO14
+- GPIO15
+- GPIO16
+- GPIO17
+- GPIO18
+- GPIO21
+- GPIO47
+
+### 可复用但需谨慎
+- GPIO0
+- GPIO3
+- GPIO19
+- GPIO20
+- GPIO39
+- GPIO40
+- GPIO41
+- GPIO42
+- GPIO43
+- GPIO44
+- GPIO45
+- GPIO46
+- GPIO48
+
+### 不可作为普通 IO 使用
+- GPIO26
+- GPIO27
+- GPIO28
+- GPIO29
+- GPIO30
+- GPIO31
+- GPIO32
+
+### R8 方案额外不可用
+- GPIO33
+- GPIO34
+- GPIO35
+- GPIO36
+- GPIO37
+
+## 分类说明表
+
+| 分类 | GPIO | 说明 |
+|---|---|---|
+| 推荐通用 | 1, 2, 4~18, 21, 47 | 适合普通输入输出、I2C、SPI、UART、PWM |
+| 启动相关 | 0, 3, 45, 46 | Strapping 引脚，上电电平敏感 |
+| 原生 USB | 19, 20 | 占用后会影响原生 USB |
+| 调试相关 | 39, 40, 41, 42 | 常与 JTAG 调试复用 |
+| 下载日志串口 | 43, 44 | 建议保留给烧录和串口日志 |
+| 板载资源 | 48 | 常与板载 RGB LED 相关 |
+| 内部存储 | 26~32 | Flash / PSRAM 内部连接，不可用 |
+| R8 额外占用 | 33~37 | Octal Flash / PSRAM 连接，R8 时不可用 |
+
+## 推荐外设分配
+
+| 外设 | 推荐引脚 |
+|---|---|
+| I2C | SDA = GPIO8，SCL = GPIO9 |
+| SPI | CS = GPIO10，MOSI = GPIO11，SCK = GPIO12，MISO = GPIO13 |
+| SPI 控制脚 | DC = GPIO14，RST = GPIO15，BL = GPIO16 |
+| 额外 UART | TX = GPIO17，RX = GPIO18 |
+| 按键输入 | GPIO4，GPIO5，GPIO6，GPIO7 |
+| PWM / 背光 / 蜂鸣器 | GPIO15，GPIO16，GPIO17，GPIO18，GPIO21，GPIO47 |
+| 中断输入 | GPIO1，GPIO2，GPIO4，GPIO5，GPIO6，GPIO7，GPIO21 |
+
+## 推荐开发规则
+
+```text
+1. 主力可用 GPIO：1、2、4~18、21、47
+2. 建议保留：19、20、43、44、48
+3. 禁止使用：26~32
+4. 如果是 R8 模组，再额外禁止：33~37
+5. 不要优先使用 0、3、45、46 作为按键或外部强驱动输入
+```
+
+## 默认接线建议
+
+```text
+I2C:
+- SDA = GPIO8
+- SCL = GPIO9
+
+SPI:
+- CS   = GPIO10
+- MOSI = GPIO11
+- SCK  = GPIO12
+- MISO = GPIO13
+
+控制脚:
+- DC  = GPIO14
+- RST = GPIO15
+- BL  = GPIO16
+
+UART:
+- TX = GPIO17
+- RX = GPIO18
+```
+
+## 一句话总结
+
+```text
+最稳的用法是：
+优先使用 GPIO1、2、4~18、21、47；
+保留 GPIO19、20、43、44、48；
+禁用 GPIO26~32；
+R8 模组再额外禁用 GPIO33~37。
+```
